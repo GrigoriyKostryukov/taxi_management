@@ -10,9 +10,11 @@ class App(tk.Tk):
         super().__init__()
         self.eval('tk::PlaceWindow . center')
         self.user = User("postgres", "password")
-        self.geometry("700x500")
+        self.geometry("1000x500")
         self.menubar = tk.Menu(self)
         self.build_menu()
+        main_table = WorkingDrivers(self)
+        main_table.pack(expand=True, fill=BOTH)
 
     def open_driver_form(self):
         DriverForm(self)
@@ -23,8 +25,8 @@ class App(tk.Tk):
     def build_menu(self):
         self.config(menu=self.menubar)
         drivers_menu = Menu(self.menubar, tearoff=0)
-        drivers_menu.add_command(label="Работающие", command=self.open_working_drivers_table)
         drivers_menu.add_command(label="Регистрация", command=self.open_driver_form)
+        drivers_menu.add_command(label="Начать работу")
         self.menubar.add_cascade(label="Водители", menu=drivers_menu)
 
         orders_menu = Menu(self.menubar, tearoff=0)

@@ -15,9 +15,9 @@ class DriverForm(tk.Toplevel):
         self.geometry('700x550')
         self.config(bg='#0B5A81')
 
-        self.show()
+        self.build()
 
-    def show(self):
+    def build(self):
         # widgets
         font = ('Arial', 14)
 
