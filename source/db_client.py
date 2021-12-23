@@ -63,6 +63,30 @@ class DatabaseClient:
         connection.close()
 
     @staticmethod
+    def start_driver_work(operator, driver_id):
+        connection = DatabaseClient.connect_to_db()
+        cursor = connection.cursor()
+        cursor.execute('''INSERT INTO working_drivers (driver_id, last_update_time)
+        VALUES (%s, now()::timestamp);''', (driver_id,))
+        connection.commit()
+        connection.close()
+
+    @staticmethod
+    def get_inactive_drivers():
+        connection = DatabaseClient.connect_to_db()
+        cursor = connection.cursor()
+        cursor.execute('''SELECT "ID", surname, name, car_number 
+        FROM drivers
+        WHERE drivers."ID" 
+        NOT IN
+        (SELECT working_drivers.driver_id FROM working_drivers);''')
+        result = cursor.fetchall()
+        connection.commit()
+        connection.close()
+        return result
+
+
+    @staticmethod
     def connect_to_db():
         conn = psycopg2.connect(
             host="127.0.0.1",

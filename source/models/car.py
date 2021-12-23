@@ -3,7 +3,7 @@ import re
 
 class Car:
 
-    def __init__(self, number, brand='N/A', model='N/A', color='N/A', cost_class=4):
+    def __init__(self, number, brand, model, color, cost_class=4):
         if not self.is_number_valid(number.upper()):
             raise ValueError('''Номер должен соответствовать формату.
                              Пример: А123АА76''')

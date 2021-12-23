@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from source.db_client import DatabaseClient
 from source.models.districts import Districts
 
@@ -10,7 +10,7 @@ class WorkingDrivers(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.selected_driver_status = DriverStatus()
-        title = Label(self, text="Положение водителей", font=("Arial", 20))
+        title = Label(self, text="Положение водителей", font=("Calibri", 20))
         title.pack(side=TOP)
         self.table_frame = Frame(self)
         self.edit_frame = Frame(self)
@@ -21,7 +21,7 @@ class WorkingDrivers(tk.Frame):
 
     def build_table(self):
 
-        self.table_frame.pack(side=LEFT, expand=True, fill='y', padx=10, pady=10)
+        self.table_frame.pack(side=LEFT, expand=True, fill='y', padx=5, pady=10)
 
         self.tree.bind("<<TreeviewSelect>>", self.select_driver)
         self.tree['columns'] = ("ID", "sur", "name", "car", "district", "status")
@@ -31,7 +31,7 @@ class WorkingDrivers(tk.Frame):
         self.tree.column("sur", width=150, anchor=CENTER)
         self.tree.column("name", width=150, anchor=CENTER)
         self.tree.column("car", width=120, anchor=CENTER)
-        self.tree.column("status", width=70, anchor=CENTER)
+        self.tree.column("status", width=100, anchor=CENTER)
         self.tree.column("car", width=100, anchor=CENTER)
         self.tree.column("district", width=150, anchor=CENTER)
         self.tree.heading('#0', text='')
@@ -53,26 +53,26 @@ class WorkingDrivers(tk.Frame):
 
     def build_editing_form(self):
         self.edit_frame.pack(side=RIGHT, expand=True, fill='y', padx=10, pady=10)
-        Arial12 = ("Arial", 12)
-        Arial14 = ("Arial", 14)
+        Calibri12 = ("Calibri", 12)
+        Calibri14 = ("Calibri", 14)
         status_frame = Frame(self.edit_frame)
-        status_lb = Label(status_frame, text="Статус", font=Arial14)
-        district_lb = Label(status_frame, text="Район", font=Arial14)
+        status_lb = Label(status_frame, text="Статус", font=Calibri14)
+        district_lb = Label(status_frame, text="Район", font=Calibri14)
         radiobuttons_frame = Frame(status_frame)
         free = Radiobutton(radiobuttons_frame, text='Свободен',
-                           variable=self.selected_driver_status.busy, value=False, font=Arial12)
+                           variable=self.selected_driver_status.busy, value=False, font=Calibri12)
         busy = Radiobutton(radiobuttons_frame, text='Занят',
-                           variable=self.selected_driver_status.busy, value=True, font=Arial12)
+                           variable=self.selected_driver_status.busy, value=True, font=Calibri12)
         free.grid(row=0, column=0)
         busy.grid(row=0, column=1)
         buttons_frame = Frame(status_frame)
         buttons_frame.grid(row=3, column=0, columnspan=3, pady=5)
-        edit = Button(buttons_frame, text="Изменить", font=Arial12, command=self.change_driver_status)
-        stop = Button(buttons_frame, text="Завершить работу", font=Arial12, command=self.stop_driver_work)
+        edit = Button(buttons_frame, text="Изменить", font=Calibri12, command=self.change_driver_status)
+        stop = Button(buttons_frame, text="Завершить работу", font=Calibri12, command=self.stop_driver_work)
 
         self.district_combobox = ttk.Combobox(status_frame,
                                               values=Districts.all_names(),
-                                              state='readonly', width=17, font=Arial12, )
+                                              state='readonly', width=17, font=Calibri12, )
         self.district_combobox.bind('<<ComboboxSelected>>',
                                     lambda _event: self.set_district_value(self.district_combobox.get()))
         status_lb.grid(row=0, column=0, pady=5, padx=10)
@@ -95,24 +95,35 @@ class WorkingDrivers(tk.Frame):
         self.selected_driver_status.driver_district = district
 
     def change_driver_status(self):
+        if not self.selected_driver_status.driver_id:
+            messagebox.showerror("Ошибка", "Водитель не выбран")
+            return
         DatabaseClient.update_driver_status("", self.selected_driver_status)
+        self.selected_driver_status.reset()
         self.update_info()
 
     def stop_driver_work(self):
+        if not self.selected_driver_status.driver_id:
+            messagebox.showerror("Ошибка", "Водитель не выбран")
+            return
+        self.selected_driver_status.reset()
         DatabaseClient.stop_driver_work("", self.selected_driver_status.driver_id)
+        self.update_info()
 
     def update_info(self):
+        self.selected_driver_status.reset()
         for item in self.tree.get_children():
             self.tree.delete(item)
         drivers = DatabaseClient.working_drivers("")
         for i in range(len(drivers)):
             self.tree.insert(index=i, values=self.process_status(list(drivers[i])), parent='')
+            print(self.process_status(list(drivers[i])))
 
 
 class DriverStatus:
 
     def __init__(self):
-        self.driver_id = 0
+        self.driver_id = None
         self.driver_district = None
         self.busy = BooleanVar()
         self.busy.set(False)
@@ -121,3 +132,7 @@ class DriverStatus:
         self.driver_id = id
         self.busy.set(busy == "Занят")
         self.driver_district = district
+
+    def reset(self):
+        self.driver_id = None
+        self.driver_district = None

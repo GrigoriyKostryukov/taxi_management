@@ -19,7 +19,7 @@ class DriverForm(tk.Toplevel):
 
     def build(self):
         # widgets
-        font = ('Arial', 14)
+        font = ('Calibri', 14)
 
         frame = Frame(self, bd=1, relief=tk.SOLID, padx=5, pady=5)
 
